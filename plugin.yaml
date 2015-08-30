@@ -1,0 +1,74 @@
+##################################################################################
+# Tomcat Node Types
+# Author: kemi
+##################################################################################
+tosca_definitions_version: cloudify_dsl_1_1
+
+plugins:
+  tomcat_plugin:
+    executor: host_agent
+    source: https://github.com/kemiz/tomcat-plugin-cfy3/archive/master.zip
+
+node_types:
+
+ ##################################################################################
+ # Tomcat Server Type
+ # A Tomcat server type that can be used to install and control a tomcat instance.
+ # The implementation uses: "sudo service <service_name> start / stop / restart"
+ # to control the service operation
+ ##################################################################################
+
+  cloudify.nodes.TomcatServer:
+    derived_from: cloudify.nodes.ServiceInstaller
+    properties:
+      service_name:
+        default: 'tomcat'
+      version:
+        default: 7
+      server_config:
+        default:
+          server_xml:
+          web_xml:
+          JAVA_OPTS:
+      config:
+        default:
+          package_list:
+            - 'openjdk-7-jdk'
+            - 'tomcat7'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        # Overriding the start impl in order to configure the service in advance
+        start:
+          implementation: tomcat_plugin.tomcat_plugin.tasks.start_tomcat
+      tomcat.interfaces:
+        configure:
+          implementation: tomcat_plugin.tomcat_plugin.tasks.configure
+
+  ##################################################################################
+  # Tomcat Application Type
+  # TODO: Implementation
+  ##################################################################################
+
+#  cloudify.nodes.TomcatApplication:
+#    derived_from: cloudify.nodes.AppInstaller
+#    properties:
+#      name:
+#        default: 'Application'
+#      version:
+#        default: '1.0'
+#      tomcat_webapp_dir:
+#        description: >
+#          WAR file to deploy
+
+relationships:
+  tomcat.contained_in:
+    derived_from: cloudify.relationships.contained_in
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        postconfigure:
+          implementation: tomcat_plugin.tomcat_plugin.service_relationships.contained_in
+          inputs:
+            service_name:
+              default: { get_property: [ SELF,  service_name ] }
+              description: >
+                Name of the service to stop
