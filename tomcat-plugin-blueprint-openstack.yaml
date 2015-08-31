@@ -1,0 +1,60 @@
+##################################################################################
+# Package Installer Blueprint Example
+##################################################################################
+
+tosca_definitions_version: cloudify_dsl_1_1
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
+  - http://www.getcloudify.org/spec/openstack-plugin/1.2/plugin.yaml
+  - http://www.getcloudify.org/spec/diamond-plugin/1.2/plugin.yaml
+  - https://raw.githubusercontent.com/kemiz/monitored-server-cfy3/master/types/monitored-server-types.yaml
+  - /Users/kemi/Documents/Development/cloudify-package-installer-plugin/plugin.yaml
+  - /Users/kemi/Documents/Development/tomcat-plugin-cfy3/plugin.yaml
+#  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/plugin.yaml
+
+inputs:
+
+  image:
+    default: '55aa4df7-1996-4507-955f-30f72d970836'
+    description: >
+      Image to be used when launching agent VM's
+
+  flavor:
+    default: 102
+    description: >
+      Flavor of the agent VM's
+
+  agent_user:
+    default: 'ubuntu'
+    description: >
+      User for connecting to agent VM's
+
+node_templates:
+
+  ##################################################################################
+  # Infrastructure Nodes
+  ##################################################################################
+
+  tomcat_host:
+    type: monitoredhosts.openstack.nodes.MonitoredServer
+
+  ##################################################################################
+  # Service Nodes
+  ##################################################################################
+
+  tomcat:
+    type: cloudify.nodes.TomcatServer
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: mongod_host
+
+  tomcat_app:
+    type: cloudify.nodes.TomcatApplication
+    properties:
+      artefact_url: https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: mongod_host
+      - type: app_deployed_in_tomcat
+        target: tomcat

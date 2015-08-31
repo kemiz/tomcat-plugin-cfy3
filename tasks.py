@@ -55,3 +55,23 @@ def configure(**_):
 
         # ctx.logger.info('Starting service: ' + service_name)
         # start_service(service_name)
+
+
+@operation
+def package(module_source_url, app_name, **_):
+    """ Deploys a WAR file to the Tomcat server WebApps directory """
+
+    source_zip = tempfile.mkstemp()
+    ctx.logger.info('Downloading file: ' + source_zip)
+    download_package(source_zip, module_source_url)
+    source_zip_path = source_zip[1]
+
+    ctx.logger.info('Packaging module using maven: ' + source_zip_path)
+    unzip_command = 'unzip {0} -d {1}'.format(source_zip_path, '/tmp')
+    run(unzip_command)
+
+    ctx.logger.info('Packaging module using maven: ' + source_zip_path)
+    package_command = 'mvn -f {0} package'.format('/tmp/{0}/pom.xml'.format(app_name))
+    run(package_command)
+
+    ctx.instance.runtime_properties['war_file'] = '/tmp/{0}'.format(app_name)

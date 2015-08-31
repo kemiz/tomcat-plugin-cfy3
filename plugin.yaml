@@ -29,7 +29,10 @@ node_types:
         default:
           server_xml:
           web_xml:
-          JAVA_OPTS:
+      java_config:
+        default:
+          xms:
+          xmx:
       config:
         default:
           package_list:
@@ -49,26 +52,48 @@ node_types:
   # TODO: Implementation
   ##################################################################################
 
-#  cloudify.nodes.TomcatApplication:
-#    derived_from: cloudify.nodes.AppInstaller
-#    properties:
-#      name:
-#        default: 'Application'
-#      version:
-#        default: '1.0'
-#      tomcat_webapp_dir:
-#        description: >
-#          WAR file to deploy
+  cloudify.nodes.TomcatApplication:
+    derived_from: cloudify.nodes.application.MavenApp
+    properties:
+      name:
+        default: 'my_tomcat_app'
+      artefact_url:
+        default: 'https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip'
+        description: >
+          Application file to deploy
+      war_file:
+        default: None
+      build_on_deploy:
+        default: True
+        type: boolean
+
+  cloudify.nodes.application.MavenApp:
+    derived_from: cloudify.nodes.ServiceInstaller
+    properties:
+      name:
+        default: 'my_maven_app'
+      version:
+        default: '1.0'
+      config:
+        default:
+          package_list:
+            - 'openjdk-7-jdk'
+            - 'maven2'
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: maven_plugin.maven_plugin.tasks.package
+
 
 relationships:
-  tomcat.contained_in:
+  app_deployed_in_tomcat:
     derived_from: cloudify.relationships.contained_in
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure:
-          implementation: tomcat_plugin.tomcat_plugin.service_relationships.contained_in
+          implementation: tomcat_plugin.tomcat_plugin.tasks.deploy_tomcat_app
           inputs:
-            service_name:
-              default: { get_property: [ SELF,  service_name ] }
-              description: >
-                Name of the service to stop
+            war_file_url:
+              default: { get_property: [ SOURCE,  war_file_url ] }
+            app_name:
+              default: { get_property: [ SOURCE,  name ] }
