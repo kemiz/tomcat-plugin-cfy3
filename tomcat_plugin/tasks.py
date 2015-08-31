@@ -10,7 +10,7 @@ from package_installer_plugin.service_tasks import start_service, stop_service
 @operation
 def start_tomcat(**_):
     # Configure before starting
-    configure()
+    configure(ctx.node.properties['server_config'])
     ctx.logger.info('Starting service')
     start_service()
 
@@ -31,10 +31,8 @@ def deploy_tomcat_app(war_file_url, app_name, **_):
 
 
 @operation
-def configure(**_):
+def configure(server_config, **_):
     """ Installs a user-defined server.xml and restarts the service """
-
-    server_config = ctx.node.properties['server_config']
 
     if 'server_xml' in server_config:
 
