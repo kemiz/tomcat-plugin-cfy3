@@ -7,9 +7,11 @@ setup(
     packages=['tomcat_plugin'],
     license='LICENSE',
     install_requires=[
-        "cloudify-plugins-common==3.2",
-        "requests",
-        'cloudify',
+        'cloudify-plugins-common==3.2',
+        'requests',
+        'cloudify'
+    ],
+    dependency_links=[
         'https://github.com/kemiz/cloudify-package-installer-plugin/archive/master.zip'
     ]
 )
