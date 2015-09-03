@@ -10,7 +10,7 @@ imports:
   - http://www.getcloudify.org/spec/diamond-plugin/1.2/plugin.yaml
   - https://raw.githubusercontent.com/kemiz/monitored-server-cfy3/master/types/monitored-server-types.yaml
   - https://raw.githubusercontent.com/kemiz/tomcat-plugin-cfy3/master/plugin.yaml
-  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/service_types.yaml
+  - https://raw.githubusercontent.com/kemiz/mongodb-plugin-cfy/master/plugin.yaml
 
 inputs:
 
@@ -28,9 +28,6 @@ inputs:
     default: 'ubuntu'
     description: >
       User for connecting to agent VM's
-
-  java_settings:
-    default:  'high'
 
 node_templates:
 
