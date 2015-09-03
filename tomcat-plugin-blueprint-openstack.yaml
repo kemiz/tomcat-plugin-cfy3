@@ -90,7 +90,8 @@ node_templates:
     relationships:
       - type: app_deployed_in_tomcat
         target: tomcat
-
+      - type: connected_to_mongo
+        target: mongodb
 
 #  ##################################################################################
 #  # Configuration Section

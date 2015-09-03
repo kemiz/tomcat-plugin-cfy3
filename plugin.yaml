@@ -61,7 +61,7 @@ node_types:
   ##################################################################################
 
   cloudify.nodes.TomcatApp:
-    derived_from: cloudify.nodes.SoftwareComponent
+    derived_from: cloudify.nodes.ApplicationModule
     properties:
       name:
         default: 'TomcatApp'
