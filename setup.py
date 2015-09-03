@@ -9,7 +9,7 @@ setup(
     install_requires=[
         'cloudify-plugins-common==3.2.1',
         'requests',
-        'cloudify'
+        'cloudify==3.2.1'
     ],
     dependency_links=[
         'https://github.com/kemiz/cloudify-package-installer-plugin/archive/master.zip'
