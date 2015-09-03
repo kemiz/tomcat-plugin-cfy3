@@ -1,36 +1,44 @@
+MVN_PACKAGE = 'package'
 __author__ = 'kemi'
 
 import tempfile
 from cloudify import exceptions, ctx
 from cloudify.decorators import operation
 from package_installer_plugin.utils import run, download_package
-from package_installer_plugin.service_tasks import start_service, stop_service
+from package_installer_plugin.service_tasks import start_service
 
 
 @operation
-def start_tomcat(**_):
+def start_tomcat(service_name, server_config, **_):
+
     # Configure before starting
-    configure(ctx.node.properties['server_config'])
+    if server_config is not None:
+        configure(server_config)
+
     ctx.logger.info('Starting service')
-    start_service()
+    start_service(service_name)
 
 
 @operation
-def deploy_tomcat_app(war_file_url, app_name, **_):
+def deploy_tomcat_app(war_file_url, server_config, app_name, **_):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
 
-    war_file = tempfile.mkstemp()
-    ctx.logger.info('Downloading file: ' + war_file_url)
-    download_package(war_file, war_file_url)
-    war_file_path = war_file[1]
-    tomcat_webapp_dir = ctx.node.properties['tomcat_webapp_dir']
+    try:
+        if 'http' in war_file_url:
+            ctx.logger.info('Downloading file: ' + war_file_url)
+            war_file = download_package(tempfile.mkstemp(), war_file_url)
+        else:
+            war_file = war_file_url
 
-    ctx.logger.info('Moving file: ' + war_file_path)
-    move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_webapp_dir + '/' + app_name
-    run(move_command)
+        ctx.logger.info('Moving file: ' + war_file)
+        tomcat_webapp_dir = server_config['tomcat_webapp_dir']
+        move_command = 'sudo mv ' + war_file + ' ' + tomcat_webapp_dir + '/' + app_name
+        run(move_command)
+    except Exception as e:
+        raise exceptions.NonRecoverableError(
+            'Failed to deploy Tomcat App: ' + e.message)
 
 
-@operation
 def configure(server_config, **_):
     """ Installs a user-defined server.xml and restarts the service """
 
@@ -43,33 +51,16 @@ def configure(server_config, **_):
         war_file_path = server_xml[1]
         tomcat_home_dir = ctx.node.properties['tomcat_home_dir']
 
-        service_name = ctx.node.properties['service_name']
-        ctx.logger.info('Stopping service: ' + service_name)
-        stop_service(service_name)
-
         ctx.logger.info('Moving file: ' + server_xml_url)
         move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_home_dir + '/server_xml'
         run(move_command)
 
-        # ctx.logger.info('Starting service: ' + service_name)
-        # start_service(service_name)
 
-
-@operation
-def package(module_source_url, app_name, **_):
-    """ Deploys a WAR file to the Tomcat server WebApps directory """
-
-    source_zip = tempfile.mkstemp()
-    ctx.logger.info('Downloading file: ' + source_zip)
-    download_package(source_zip, module_source_url)
-    source_zip_path = source_zip[1]
-
-    ctx.logger.info('Packaging module using maven: ' + source_zip_path)
-    unzip_command = 'unzip {0} -d {1}'.format(source_zip_path, '/tmp')
-    run(unzip_command)
-
-    ctx.logger.info('Packaging module using maven: ' + source_zip_path)
-    package_command = 'mvn -f {0} package'.format('/tmp/{0}/pom.xml'.format(app_name))
+def _run_maven_command(pom_xml, mvn_operation):
+    package_command = 'mvn -f {0} {1}'.format(pom_xml, mvn_operation)
+    ctx.logger.info('Executing maven operation: ' + package_command)
     run(package_command)
 
-    ctx.instance.runtime_properties['war_file'] = '/tmp/{0}'.format(app_name)
+
+def _maven_package(app_name):
+    _run_maven_command('/tmp/{0}/pom.xml'.format(app_name), MVN_PACKAGE)

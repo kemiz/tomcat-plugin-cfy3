@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='cloudify-tomcat-plugin',
-    version='1.2',
+    version='1.2.1',
     author='kemiz',
     packages=['tomcat_plugin'],
     license='LICENSE',
     install_requires=[
-        'cloudify-plugins-common==3.2',
+        'cloudify-plugins-common==3.2.1',
         'requests',
         'cloudify'
     ],

@@ -9,9 +9,8 @@ imports:
   - http://www.getcloudify.org/spec/openstack-plugin/1.2/plugin.yaml
   - http://www.getcloudify.org/spec/diamond-plugin/1.2/plugin.yaml
   - https://raw.githubusercontent.com/kemiz/monitored-server-cfy3/master/types/monitored-server-types.yaml
-  - /Users/kemi/Documents/Development/cloudify-package-installer-plugin/plugin.yaml
-  - /Users/kemi/Documents/Development/tomcat-plugin-cfy3/plugin.yaml
-#  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/plugin.yaml
+  - https://raw.githubusercontent.com/kemiz/tomcat-plugin-cfy3/master/plugin.yaml
+  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/service_types.yaml
 
 inputs:
 
@@ -30,6 +29,9 @@ inputs:
     description: >
       User for connecting to agent VM's
 
+  java_settings:
+    default:  'high'
+
 node_templates:
 
   ##################################################################################
@@ -39,22 +41,91 @@ node_templates:
   tomcat_host:
     type: monitoredhosts.openstack.nodes.MonitoredServer
 
+  mongodb_host:
+    type: monitoredhosts.openstack.nodes.MonitoredServer
+
+
   ##################################################################################
   # Service Nodes
   ##################################################################################
 
+  ##################################################################################
+  # Tomcat server that
+  ##################################################################################
+
   tomcat:
     type: cloudify.nodes.TomcatServer
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: mongod_host
-
-  tomcat_app:
-    type: cloudify.nodes.TomcatApplication
     properties:
-      artefact_url: https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip
+      server_xml: 'https://s3-eu-west-1.amazonaws.com/kemiz/server.xml'
     relationships:
       - type: cloudify.relationships.contained_in
-        target: mongod_host
+        target: tomcat_host
+
+  ##################################################################################
+  # MongoDB node as a backend data-store for the example Tomcat application
+  ##################################################################################
+
+  mongodb:
+    type: cloudify.nodes.MongoDB
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: mongodb_host
+
+
+  ##################################################################################
+  # Application Nodes
+  ##################################################################################
+
+  ##################################################################################
+  # This is a Tomcat / MongoDB example application built from source using a
+  # Maven plugin. A URL is provided where the zipped source code may be obtained.
+  # The zip is then extracted, packaged using maven and finally copied to the
+  # specified Tomcat server WebApps directory.
+  ##################################################################################
+
+  tomcat_maven_app:
+    type: cloudify.nodes.TomcatApp
+    properties:
+      name: 'MongoDBWebapp'
+      artefact_url: 'https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip'
+      maven_app: True
+    relationships:
       - type: app_deployed_in_tomcat
         target: tomcat
+
+
+#  ##################################################################################
+#  # Configuration Section
+#  ##################################################################################
+#
+#  ##################################################################################
+#  # This is the Tomcat server configuration that we will be using for starting the
+#  # server up. You can specify a URL for the server and web xml files.
+#  ##################################################################################
+#
+#  tomcat_config:
+#    type: configuration
+#    properties:
+#      config:
+#        server_xml: 'https://s3-eu-west-1.amazonaws.com/kemiz/server.xml'
+#        web_xml: ''
+##        java_profile: { get_property: [ java_config, config, high ] }
+#
+#  ##################################################################################
+#  # These are some preset Java configurations that can be used when bootstrapping
+#  # the Tomcat server.
+#  ##################################################################################
+#
+#node_types:
+#
+#  java_config:
+#    derived_from: cloudify.nodes.Root
+#    properties:
+#      config:
+#        default:
+#          high:
+#            xmx: 1024M
+#            xms: 1024M
+#          low:
+#            xmx: 256M
+#            xms: 256M

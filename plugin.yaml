@@ -4,6 +4,9 @@
 ##################################################################################
 tosca_definitions_version: cloudify_dsl_1_1
 
+imports:
+  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/plugin.yaml
+
 plugins:
   tomcat_plugin:
     executor: host_agent
@@ -25,14 +28,19 @@ node_types:
         default: 'tomcat'
       version:
         default: 7
-      server_config:
-        default:
-          server_xml:
-          web_xml:
+      server_xml:
+        default: None
+      web_xml:
+        default: None
+      webapps_dir:
+        default: '/usr/share/tomcat7-root'
+      catalina_home:
+        default: '/etc/tomcat7'
       java_config:
         default:
-          xms:
-          xmx:
+          jvm:
+            xmx: 512M
+            xms: 512M
       config:
         default:
           package_list:
@@ -43,46 +51,27 @@ node_types:
         # Overriding the start impl in order to configure the service in advance
         start:
           implementation: tomcat_plugin.tomcat_plugin.tasks.start_tomcat
+          inputs:
+            service_name:
+              default: { get_property: [ SELF, service_name ] }
       tomcat.interfaces:
         configure:
           implementation: tomcat_plugin.tomcat_plugin.tasks.configure
 
+
   ##################################################################################
-  # Tomcat Application Type
-  # TODO: Implementation
+  # Tomcat Simple Application Type (WAR)
   ##################################################################################
 
-  cloudify.nodes.TomcatApplication:
-    derived_from: cloudify.nodes.application.MavenApp
+  cloudify.nodes.TomcatApp:
+    derived_from: cloudify.nodes.SoftwareComponent
     properties:
       name:
-        default: 'my_tomcat_app'
+        default: 'TomcatApp'
       artefact_url:
-        default: 'https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip'
-        description: >
-          Application file to deploy
-      war_file:
         default: None
-      build_on_deploy:
-        default: True
-        type: boolean
-
-  cloudify.nodes.application.MavenApp:
-    derived_from: cloudify.nodes.ServiceInstaller
-    properties:
-      name:
-        default: 'my_maven_app'
-      version:
-        default: '1.0'
-      config:
-        default:
-          package_list:
-            - 'openjdk-7-jdk'
-            - 'maven2'
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: maven_plugin.maven_plugin.tasks.package
+      maven_app:
+        default: False
 
 
 relationships:
@@ -93,7 +82,7 @@ relationships:
         postconfigure:
           implementation: tomcat_plugin.tomcat_plugin.tasks.deploy_tomcat_app
           inputs:
-            war_file_url:
-              default: { get_property: [ SOURCE,  war_file_url ] }
+            artefact_url:
+              default: { get_property: [ SOURCE,  artefact_url ] }
             app_name:
               default: { get_property: [ SOURCE,  name ] }
