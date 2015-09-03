@@ -4,9 +4,6 @@
 ##################################################################################
 tosca_definitions_version: cloudify_dsl_1_1
 
-imports:
-  - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/plugin.yaml
-
 plugins:
   tomcat_plugin:
     executor: host_agent
