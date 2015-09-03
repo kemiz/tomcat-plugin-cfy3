@@ -25,19 +25,13 @@ node_types:
         default: 'tomcat'
       version:
         default: 7
-      server_xml:
-        default: None
-      web_xml:
-        default: None
-      webapps_dir:
-        default: '/usr/share/tomcat7-root'
-      catalina_home:
-        default: '/etc/tomcat7'
-      java_config:
+      server_config:
         default:
-          jvm:
-            xmx: 512M
-            xms: 512M
+          server_xml: None
+          web_xml: None
+          webapps_dir: None
+          catalina_home: None
+          java_opts: None
       config:
         default:
           package_list:
@@ -51,6 +45,8 @@ node_types:
           inputs:
             service_name:
               default: { get_property: [ SELF, service_name ] }
+            server_config:
+              default: { get_property: [ SELF, server_config ]}
       tomcat.interfaces:
         configure:
           implementation: tomcat_plugin.tomcat_plugin.tasks.configure
