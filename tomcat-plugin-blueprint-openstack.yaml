@@ -53,8 +53,6 @@ node_templates:
 
   tomcat:
     type: cloudify.nodes.TomcatServer
-    properties:
-      server_xml: 'https://s3-eu-west-1.amazonaws.com/kemiz/server.xml'
     relationships:
       - type: cloudify.relationships.contained_in
         target: tomcat_host
