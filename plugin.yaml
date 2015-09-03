@@ -26,10 +26,10 @@ node_types:
       version:
         default: 7
       server_config:
-        default: None
+        default:
 #          server_xml: None
 #          web_xml: None
-#          webapps_dir: None
+          webapps_dir: '/usr/share/tomcat7-root'
 #          catalina_home: None
 #          java_opts: None
       config:
