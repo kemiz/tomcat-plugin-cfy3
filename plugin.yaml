@@ -26,12 +26,12 @@ node_types:
       version:
         default: 7
       server_config:
-        default:
-          server_xml: None
-          web_xml: None
-          webapps_dir: None
-          catalina_home: None
-          java_opts: None
+        default: None
+#          server_xml: None
+#          web_xml: None
+#          webapps_dir: None
+#          catalina_home: None
+#          java_opts: None
       config:
         default:
           package_list:
