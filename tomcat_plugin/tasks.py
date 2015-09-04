@@ -9,11 +9,11 @@ from package_installer_plugin.service_tasks import start_service
 
 
 @operation
-def start_tomcat(service_name, server_config, **_):
+def start_tomcat(service_name, **_):
 
     # Configure before starting
-    if server_config is not None:
-        configure(server_config)
+    if _[0] is not None:
+        configure(_[0])
 
     ctx.logger.info('Starting service')
     start_service(service_name)
