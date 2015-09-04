@@ -21,8 +21,18 @@ def start_tomcat(service_name, **kwargs):
 
 
 @operation
-def deploy_tomcat_app(war_file_url, server_config, app_name, **_):
+def deploy_tomcat_app(**kwargs):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
+
+    ctx.logger.info(kwargs)
+    if 'war_file_url' \
+            or 'server_config' \
+            or 'app_name' not in kwargs:
+                raise exceptions.NonRecoverableError('No server configuration specified!')
+
+    war_file_url = kwargs['war_file_url']
+    server_config = kwargs['server_config']
+    app_name = kwargs['war_file_url']
 
     try:
         if 'http' in war_file_url:
