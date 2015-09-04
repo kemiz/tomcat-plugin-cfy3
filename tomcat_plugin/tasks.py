@@ -39,6 +39,7 @@ def deploy_tomcat_app(war_file_url, server_config, app_name, **_):
             'Failed to deploy Tomcat App: ' + e.message)
 
 
+@operation
 def configure(server_config, **_):
     """ Installs a user-defined server.xml and restarts the service """
 
@@ -55,13 +56,3 @@ def configure(server_config, **_):
             ctx.logger.info('Moving file: ' + server_xml_url)
             move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
-
-
-def _run_maven_command(pom_xml, mvn_operation):
-    package_command = 'mvn -f {0} {1}'.format(pom_xml, mvn_operation)
-    ctx.logger.info('Executing maven operation: ' + package_command)
-    run(package_command)
-
-
-def _maven_package(app_name):
-    _run_maven_command('/tmp/{0}/pom.xml'.format(app_name), MVN_PACKAGE)
