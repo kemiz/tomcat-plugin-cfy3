@@ -46,7 +46,7 @@ def deploy_tomcat_app(**kwargs):
             war_file = artefact_url
 
         ctx.logger.info('Moving file: ' + war_file[1])
-        move_command = 'sudo mv ' + war_file[1] + ' ' + tomcat_webapp_dir + app_name
+        move_command = 'sudo mv ' + war_file[1] + ' ' + tomcat_webapp_dir + '/' + app_name
         run(move_command)
     except Exception as e:
         raise exceptions.NonRecoverableError(
