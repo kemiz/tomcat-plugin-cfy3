@@ -36,8 +36,11 @@ def deploy_tomcat_app(**kwargs):
 
     try:
         if 'http' in artefact_url:
-            ctx.logger.info('Downloading file: ' + artefact_url)
-            war_file = download_package(tempfile.mkstemp(), artefact_url)
+            try:
+                ctx.logger.info('Downloading file: ' + artefact_url)
+                war_file = download_package(tempfile.mkstemp(), artefact_url)
+            except Exception as e:
+                raise exceptions.RecoverableError(e)
         else:
             war_file = artefact_url
 
