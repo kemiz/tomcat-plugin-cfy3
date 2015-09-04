@@ -22,7 +22,7 @@ node_types:
     derived_from: cloudify.nodes.ServiceInstaller
     properties:
       service_name:
-        default: 'tomcat'
+        default: 'tomcat7'
       version:
         default: 7
       server_config:
