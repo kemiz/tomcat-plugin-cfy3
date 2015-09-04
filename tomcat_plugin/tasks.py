@@ -38,14 +38,15 @@ def deploy_tomcat_app(**kwargs):
         if 'http' in artefact_url:
             try:
                 ctx.logger.info('Downloading file: ' + artefact_url)
-                war_file = download_package(tempfile.mkstemp(), artefact_url)
+                war_file = tempfile.mkstemp()
+                download_package(war_file, artefact_url)
             except Exception as e:
                 raise exceptions.RecoverableError(e)
         else:
             war_file = artefact_url
 
-        ctx.logger.info('Moving file: ' + war_file)
-        move_command = 'sudo mv ' + war_file + ' ' + tomcat_webapp_dir + '/' + app_name
+        ctx.logger.info('Moving file: ' + war_file[1])
+        move_command = 'sudo mv ' + war_file[1] + ' ' + tomcat_webapp_dir + app_name
         run(move_command)
     except Exception as e:
         raise exceptions.NonRecoverableError(
