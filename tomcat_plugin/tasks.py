@@ -25,24 +25,23 @@ def deploy_tomcat_app(**kwargs):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
 
     ctx.logger.info(kwargs)
-    if 'war_file_url' \
-            or 'server_config' \
+    if 'artefact_url' \
+            or 'webapps_dir' \
             or 'app_name' not in kwargs:
                 raise exceptions.NonRecoverableError('No server configuration specified!')
 
-    war_file_url = kwargs['war_file_url']
-    server_config = kwargs['server_config']
-    app_name = kwargs['war_file_url']
+    artefact_url = kwargs['artefact_url']
+    tomcat_webapp_dir = kwargs['webapps_dir']
+    app_name = kwargs['app_name']
 
     try:
-        if 'http' in war_file_url:
-            ctx.logger.info('Downloading file: ' + war_file_url)
-            war_file = download_package(tempfile.mkstemp(), war_file_url)
+        if 'http' in artefact_url:
+            ctx.logger.info('Downloading file: ' + artefact_url)
+            war_file = download_package(tempfile.mkstemp(), artefact_url)
         else:
-            war_file = war_file_url
+            war_file = artefact_url
 
         ctx.logger.info('Moving file: ' + war_file)
-        tomcat_webapp_dir = server_config['tomcat_webapp_dir']
         move_command = 'sudo mv ' + war_file + ' ' + tomcat_webapp_dir + '/' + app_name
         run(move_command)
     except Exception as e:
