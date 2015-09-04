@@ -42,9 +42,9 @@ node_types:
         # Overriding the start impl in order to configure the service in advance
         configure:
           implementation: tomcat_plugin.tomcat_plugin.tasks.configure
-            inputs:
-              server_config:
-                default: { get_property: [ SELF, server_config ] }
+          inputs:
+            server_config:
+              default: { get_property: [ SELF, server_config ] }
         start:
           implementation: tomcat_plugin.tomcat_plugin.tasks.start_tomcat
           inputs:
