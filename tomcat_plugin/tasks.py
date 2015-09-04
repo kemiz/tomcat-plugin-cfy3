@@ -25,10 +25,10 @@ def deploy_tomcat_app(**kwargs):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
 
     ctx.logger.info(kwargs)
-    if 'artefact_url' \
-            or 'webapps_dir' \
-            or 'app_name' not in kwargs:
-                raise exceptions.NonRecoverableError('No server configuration specified!')
+    # if 'artefact_url' \
+    #         or 'webapps_dir' \
+    #         or 'app_name' not in kwargs:
+    #             raise exceptions.NonRecoverableError('No server configuration specified!')
 
     artefact_url = kwargs['artefact_url']
     tomcat_webapp_dir = kwargs['webapps_dir']
