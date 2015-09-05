@@ -31,8 +31,9 @@ def deploy_tomcat_app(**kwargs):
     if 'http' in artefact_url:
         ctx.logger.info('Downloading application files: {0}'.format(artefact_url))
         temp_file = tempfile.mkstemp()
-        war_file_path, file_path = temp_file[1]
+        file_path = temp_file[1]
         download_file(file_path, artefact_url)
+        war_file_path = file_path
         if kwargs['maven_app'] is True:
             ctx.logger.info('Maven app detected, building from source: ' + artefact_url)
             war_file_path = package(file_path, app_name)
