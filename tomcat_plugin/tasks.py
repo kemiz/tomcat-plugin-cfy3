@@ -4,9 +4,9 @@ __author__ = 'kemi'
 import tempfile
 from cloudify import exceptions, ctx
 from cloudify.decorators import operation
-from package_installer_plugin.utils import run, download_package
+from package_installer_plugin.utils import run, download_file
 from package_installer_plugin.service_tasks import start_service
-
+from maven_plugin.tasks import package
 
 @operation
 def start_tomcat(service_name, **kwargs):
@@ -25,10 +25,6 @@ def deploy_tomcat_app(**kwargs):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
 
     ctx.logger.info(kwargs)
-    # if 'artefact_url' \
-    #         or 'webapps_dir' \
-    #         or 'app_name' not in kwargs:
-    #             raise exceptions.NonRecoverableError('No server configuration specified!')
 
     artefact_url = kwargs['artefact_url']
     tomcat_webapp_dir = kwargs['webapps_dir']
@@ -36,18 +32,15 @@ def deploy_tomcat_app(**kwargs):
 
     try:
         if 'http' in artefact_url:
-            try:
-                ctx.logger.info('Downloading file: ' + artefact_url)
-                war_file = tempfile.mkstemp()
-                download_package(war_file, artefact_url)
-            except Exception as e:
-                raise exceptions.RecoverableError(e)
-        else:
-            war_file = artefact_url
+            ctx.logger.info('Downloading file: ' + artefact_url)
+            war_file_path, file_path = '/tmp/{0}'.format(app_name)
+            download_file(file_path, artefact_url)
+            if kwargs['maven_app'] is True:
+                war_file_path = package(file_path, app_name)
 
-        ctx.logger.info('Moving file: ' + war_file[1])
-        move_command = 'sudo mv ' + war_file[1] + ' ' + tomcat_webapp_dir + '/' + app_name
-        run(move_command)
+            ctx.logger.info('Moving file: ' + war_file_path)
+            move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_webapp_dir + '/' + app_name
+            run(move_command)
     except Exception as e:
         raise exceptions.NonRecoverableError(
             'Failed to deploy Tomcat App: ' + e.message)
@@ -61,8 +54,9 @@ def configure(server_config, **_):
         if server_config['java_opts'] is not None:
             java_opts = 'export JAVA_OPTS="' + server_config['java_opts'] + '"'
             ctx.logger.info('Custom JAVA_OPTS requested: ' + java_opts)
-            set_env_sh = '/tmp/setenv.sh'
-            ctx.logger.info('Opening temp setenv.sh at {0}, writing: {1}'.format(set_env_sh, java_opts))
+            set_env_sh = tempfile.mkstemp()
+            set_env_sh_path = set_env_sh[1]
+            ctx.logger.info('Opening temp setenv.sh at {0}, writing: {1}'.format(set_env_sh_path, java_opts))
             with open(set_env_sh, 'wb') as f:
                 f.write(java_opts)
                 f.flush()
@@ -71,7 +65,7 @@ def configure(server_config, **_):
                 raise exceptions.NonRecoverableError('Requested custom JAVA_OPTS but no "catalina_home" home specified!')
             destination = server_config['catalina_home'] + 'bin/setenv.sh'
             ctx.logger.info('Moving file to Catalina home: {0}'.format(destination))
-            move_command = 'sudo mv ' + set_env_sh + ' ' + destination
+            move_command = 'sudo mv ' + set_env_sh_path + ' ' + destination
             run(move_command)
 
     if 'server_xml' in server_config:
@@ -79,11 +73,11 @@ def configure(server_config, **_):
             server_xml_url = server_config['server_xml']
             ctx.logger.info('Custom server.xml requested: ' + server_xml_url)
             server_xml = tempfile.mkstemp()
-            download_package(server_xml, server_xml_url)
-            war_file_path = server_xml[1]
+            download_file(source=server_xml_url, destination=server_xml)
+            server_xml_path = server_xml[1]
             if ctx.node.properties['tomcat_home_dir'] is None:
                 raise exceptions.NonRecoverableError('Requested custom server.xml but no "tomcat_home_dir" specified!')
             tomcat_home_dir = ctx.node.properties['tomcat_home_dir']
             ctx.logger.info('Moving file: ' + server_xml_url)
-            move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_home_dir + '/server_xml'
+            move_command = 'sudo mv ' + server_xml_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
