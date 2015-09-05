@@ -12,6 +12,7 @@ setup(
         'cloudify==3.2.1'
     ],
     dependency_links=[
-        'https://github.com/kemiz/cloudify-package-installer-plugin/archive/master.zip'
+        'https://github.com/kemiz/cloudify-package-installer-plugin/archive/master.zip',
+        'https://github.com/kemiz/maven_plugin/archive/master.zip'
     ]
 )
