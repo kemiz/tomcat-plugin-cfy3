@@ -22,24 +22,22 @@ def start_tomcat(service_name, **kwargs):
 @operation
 def deploy_tomcat_app(**kwargs):
     """ Deploys a WAR file to the Tomcat server WebApps directory """
-    try:
-        ctx.logger.info(kwargs)
-        artefact_url = kwargs['artefact_url']
-        tomcat_webapp_dir = kwargs['webapps_dir']
-        app_name = kwargs['app_name']
-        if 'http' in artefact_url:
-            ctx.logger.info('Downloading application files: {0}'.format(artefact_url))
-            war_file_path, file_path = '/tmp/{0}'.format(app_name)
-            download_file(file_path, artefact_url)
-            if kwargs['maven_app'] is True:
-                ctx.logger.info('Maven app detected, building from source: ' + artefact_url)
-                war_file_path = package(file_path, app_name)
-            ctx.logger.info('Moving file: ' + war_file_path)
-            move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_webapp_dir + '/' + app_name
-            run(move_command)
-    except Exception as e:
-        raise exceptions.NonRecoverableError(
-            'Failed to deploy Tomcat App: ' + e.message)
+
+    ctx.logger.info(kwargs)
+    artefact_url = kwargs['artefact_url']
+    tomcat_webapp_dir = kwargs['webapps_dir']
+    app_name = kwargs['app_name']
+
+    if 'http' in artefact_url:
+        ctx.logger.info('Downloading application files: {0}'.format(artefact_url))
+        war_file_path, file_path = '/tmp/{0}'.format(app_name)
+        download_file(file_path, artefact_url)
+        if kwargs['maven_app'] is True:
+            ctx.logger.info('Maven app detected, building from source: ' + artefact_url)
+            war_file_path = package(file_path, app_name)
+        ctx.logger.info('Moving file: ' + war_file_path)
+        move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_webapp_dir + '/' + app_name
+        run(move_command)
 
 
 @operation

@@ -80,8 +80,8 @@ node_templates:
     type: cloudify.nodes.TomcatApp
     properties:
       name: 'MongoDBWebapp'
-      artefact_url: 'https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.zip'
-      maven_app: True
+      artefact_url: 'https://s3-eu-west-1.amazonaws.com/kemiz/MongoDBWebapp.war'
+      maven_app: False
     relationships:
       - type: app_deployed_in_tomcat
         target: tomcat
