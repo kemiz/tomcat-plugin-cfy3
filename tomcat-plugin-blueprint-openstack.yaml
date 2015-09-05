@@ -79,7 +79,7 @@ node_templates:
   tomcat_maven_app:
     type: cloudify.nodes.TomcatApp
     properties:
-      name: 'MongoDBWebapp'
+      name: 'MongoDBWebapp-master'
       artefact_url: 'https://github.com/kemiz/MongoDBWebapp/archive/master.zip'
       maven_app: True
     relationships:
