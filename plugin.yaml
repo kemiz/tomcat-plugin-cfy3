@@ -86,3 +86,5 @@ relationships:
               default: { get_property: [ SOURCE, name ] }
             maven_app:
               default: { get_property: [ SOURCE, maven_app]}
+            branch:
+              default: { get_property: [ SOURCE, branch]}

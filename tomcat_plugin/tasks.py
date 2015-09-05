@@ -36,7 +36,10 @@ def deploy_tomcat_app(**kwargs):
         if maven_app is True:
             ctx.logger.info('Maven app detected, building from source: ' + artefact_url)
             unzip(temp_file_path, '/tmp')
-            run_maven_command('/tmp/{0}/pom.xml'.format(app_name), MVN_PACKAGE)
+            source_dir = app_name
+            if kwargs['branch'] is not None:
+                source_dir = app_name + '-' + kwargs['branch']
+            run_maven_command('/tmp/{0}/pom.xml'.format(source_dir), MVN_PACKAGE)
             war_file = '/tmp/{0}/target/{0}.war'.format(app_name)
         move_file(tomcat_webapp_dir, war_file)
 

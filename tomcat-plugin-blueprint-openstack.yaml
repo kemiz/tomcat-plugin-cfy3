@@ -79,9 +79,10 @@ node_templates:
   tomcat_maven_app:
     type: cloudify.nodes.TomcatApp
     properties:
-      name: 'MongoDBWebapp-master'
-      artefact_url: 'https://github.com/kemiz/MongoDBWebapp/archive/master.zip'
+      name: 'MongoDBWebapp'
+      artefact_url: { concat: [ 'https://github.com/kemiz/MongoDBWebapp/archive/', { get_property: [ SELF, branch ] }, '.zip' ] }
       maven_app: True
+      branch: 'master'
     relationships:
       - type: app_deployed_in_tomcat
         target: tomcat
