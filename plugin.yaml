@@ -38,6 +38,8 @@ node_types:
           package_list:
             - 'openjdk-7-jdk'
             - 'tomcat7'
+            - 'maven2'
+            - 'unzip'
     interfaces:
       cloudify.interfaces.lifecycle:
         # Overriding the start impl in order to configure the service in advance

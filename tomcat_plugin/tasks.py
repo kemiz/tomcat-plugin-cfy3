@@ -47,8 +47,9 @@ def deploy_tomcat_app(**kwargs):
 
 @operation
 def configure(server_config, **_):
-    """ Installs a user-defined server.xml and restarts the service """
+    """ Configures the Tomcat server with a given server_config """
 
+    # Installs a custom setenv.sh with custom server jvm configuration
     if 'java_opts' in server_config:
         if server_config['java_opts'] is not None:
             java_opts = 'export JAVA_OPTS="' + server_config['java_opts'] + '"'
@@ -56,7 +57,7 @@ def configure(server_config, **_):
             set_env_sh = tempfile.mkstemp()
             set_env_sh_path = set_env_sh[1]
             ctx.logger.info('Opening temp setenv.sh at {0}, writing: {1}'.format(set_env_sh_path, java_opts))
-            with open(set_env_sh, 'wb') as f:
+            with open(set_env_sh_path, 'wb') as f:
                 f.write(java_opts)
                 f.flush()
                 f.close()
@@ -67,6 +68,7 @@ def configure(server_config, **_):
             move_command = 'sudo mv ' + set_env_sh_path + ' ' + destination
             run(move_command)
 
+    # Installs a user-defined server.xml and restarts the service
     if 'server_xml' in server_config:
         if server_config['server_xml'] is not None:
             server_xml_url = server_config['server_xml']
@@ -80,6 +82,7 @@ def configure(server_config, **_):
             ctx.logger.info('Moving file: ' + server_xml_url)
             move_command = 'sudo mv ' + server_xml_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
+
 
 def package(module_source_zip_path, app_name, **_):
     """
