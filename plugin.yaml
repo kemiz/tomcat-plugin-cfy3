@@ -68,7 +68,8 @@ node_types:
         default: None
       maven_app:
         default: False
-
+      branch:
+        default: None
 
 relationships:
   app_deployed_in_tomcat:
@@ -81,10 +82,10 @@ relationships:
             artefact_url:
               default: { get_property: [ SOURCE, artefact_url ] }
             webapps_dir:
-              default: { get_property: [ TARGET, server_config, webapps_dir] }
+              default: { get_property: [ TARGET, server_config, webapps_dir ] }
             app_name:
               default: { get_property: [ SOURCE, name ] }
             maven_app:
-              default: { get_property: [ SOURCE, maven_app]}
+              default: { get_property: [ SOURCE, maven_app ] }
             branch:
-              default: { get_property: [ SOURCE, branch]}
+              default: { get_property: [ SOURCE, branch ] }
