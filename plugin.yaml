@@ -79,8 +79,10 @@ relationships:
           implementation: tomcat_plugin.tomcat_plugin.tasks.deploy_tomcat_app
           inputs:
             artefact_url:
-              default: { get_property: [ SOURCE,  artefact_url ] }
+              default: { get_property: [ SOURCE, artefact_url ] }
             webapps_dir:
-              default: { get_property: [ TARGET,  server_config,  webapps_dir] }
+              default: { get_property: [ TARGET, server_config, webapps_dir] }
             app_name:
-              default: { get_property: [ SOURCE,  name ] }
+              default: { get_property: [ SOURCE, name ] }
+            maven_app:
+              default: { get_property: [ SOURCE, maven_app]}
