@@ -29,7 +29,7 @@ node_types:
         default:
 #          server_xml:
 #          web_xml:
-          webapps_dir: '/usr/share/tomcat7-root'
+          webapps_dir: '/var/lib/tomcat7/webapps/'
 #          catalina_home:
 #          java_opts:
       config:
