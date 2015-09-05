@@ -4,7 +4,7 @@ __author__ = 'kemi'
 import tempfile
 from cloudify import exceptions, ctx
 from cloudify.decorators import operation
-from package_installer_plugin.utils import run, download_file, unzip
+from package_installer_plugin.utils import run, download_file, unzip, move_file, run_maven_command
 from package_installer_plugin.service_tasks import start_service
 
 @operation
@@ -15,7 +15,6 @@ def start_tomcat(service_name, **kwargs):
         if 'service_config' in kwargs:
             configure(kwargs['service_config'])
 
-    ctx.logger.info('Starting service')
     start_service(service_name)
 
 
@@ -30,23 +29,22 @@ def deploy_tomcat_app(**kwargs):
     maven_app = kwargs['maven_app']
 
     if 'http' in artefact_url:
-        ctx.logger.info('Downloading application files: {0}'.format(artefact_url))
         temp_file = tempfile.mkstemp()
-        file_path = temp_file[1]
-        download_file(source=artefact_url, destination=file_path)
-        war_file_path = file_path
+        temp_file_path = temp_file[1]
+        download_file(source=artefact_url, destination=temp_file_path)
+        war_file = temp_file_path
         if maven_app is True:
             ctx.logger.info('Maven app detected, building from source: ' + artefact_url)
-            war_file_path = package(file_path, app_name)
-        ctx.logger.info('Moving file: ' + war_file_path)
-        move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_webapp_dir + '/' + app_name
-        run(move_command)
+            unzip(temp_file_path, '/tmp')
+            run_maven_command('/tmp/{0}/pom.xml'.format(app_name), MVN_PACKAGE)
+            war_file = '/tmp/{0}/target/{0}.war'.format(app_name)
+        move_file(tomcat_webapp_dir, war_file)
 
 
 @operation
 def configure(server_config, **_):
     """ Configures the Tomcat server with a given server_config """
-
+    ctx.logger.info('Configuring Tomcat server...')
     # Installs a custom setenv.sh with custom server jvm configuration
     if 'java_opts' in server_config:
         if server_config['java_opts'] is not None:
@@ -80,21 +78,3 @@ def configure(server_config, **_):
             ctx.logger.info('Moving file: ' + server_xml_url)
             move_command = 'sudo mv ' + server_xml_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
-
-
-def package(module_source_zip_path, app_name, **_):
-    """
-    Downloads application source as zip and uses maven to
-    build and package a deployable WAR file
-    """
-
-    ctx.logger.info('Unzipping: ' + module_source_zip_path)
-    unzip(module_source_zip_path, '/tmp')
-    _run_maven_command('/tmp/{0}/pom.xml'.format(app_name), MVN_PACKAGE)
-    return '/tmp/{0}/target/{0}.war'.format(app_name)
-
-
-def _run_maven_command(pom_xml, mvn_operation):
-    package_command = 'mvn -f {0} {1}'.format(pom_xml, mvn_operation)
-    ctx.logger.info('Executing maven operation: ' + package_command)
-    run(package_command)
