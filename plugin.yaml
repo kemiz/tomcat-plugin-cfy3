@@ -29,9 +29,10 @@ node_types:
         default:
 #          server_xml:
 #          web_xml:
+          tomcat_home_dir: '/etc/tomcat7/'
           webapps_dir: '/var/lib/tomcat7/webapps/'
-#          catalina_home:
-#          java_opts:
+          catalina_home: '/usr/share/tomcat7/'
+          java_opts: '-server -Xmx512m'
       config:
         default:
           package_list:

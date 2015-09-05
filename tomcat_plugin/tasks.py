@@ -57,16 +57,33 @@ def deploy_tomcat_app(**kwargs):
 def configure(server_config, **_):
     """ Installs a user-defined server.xml and restarts the service """
 
+    if 'java_opts' in server_config:
+        if server_config['java_opts'] is not None:
+            java_opts = 'export JAVA_OPTS="' + server_config['java_opts'] + '"'
+            ctx.logger.info('Custom JAVA_OPTS requested: ' + java_opts)
+            set_env_sh = '/tmp/setenv.sh'
+            ctx.logger.info('Opening temp setenv.sh at {0}, writing: {1}'.format(set_env_sh, java_opts))
+            with open(set_env_sh, 'wb') as f:
+                f.write(java_opts)
+                f.flush()
+                f.close()
+            if 'catalina_home' not in server_config:
+                raise exceptions.NonRecoverableError('Requested custom JAVA_OPTS but no "catalina_home" home specified!')
+            destination = server_config['catalina_home'] + 'bin/setenv.sh'
+            ctx.logger.info('Moving file to Catalina home: {0}'.format(destination))
+            move_command = 'sudo mv ' + set_env_sh + ' ' + destination
+            run(move_command)
+
     if 'server_xml' in server_config:
         if server_config['server_xml'] is not None:
-
             server_xml_url = server_config['server_xml']
-            ctx.logger.info('Downloading file: ' + server_xml_url)
+            ctx.logger.info('Custom server.xml requested: ' + server_xml_url)
             server_xml = tempfile.mkstemp()
             download_package(server_xml, server_xml_url)
             war_file_path = server_xml[1]
+            if ctx.node.properties['tomcat_home_dir'] is None:
+                raise exceptions.NonRecoverableError('Requested custom server.xml but no "tomcat_home_dir" specified!')
             tomcat_home_dir = ctx.node.properties['tomcat_home_dir']
-
             ctx.logger.info('Moving file: ' + server_xml_url)
             move_command = 'sudo mv ' + war_file_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
