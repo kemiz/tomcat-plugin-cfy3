@@ -40,7 +40,7 @@ def deploy_tomcat_app(**kwargs):
             if kwargs['branch'] is not None:
                 source_dir = app_name + '-' + kwargs['branch']
             run_maven_command('/tmp/{0}/pom.xml'.format(source_dir), MVN_PACKAGE)
-            war_file = '/tmp/{0}/target/{0}.war'.format(app_name)
+            war_file = '/tmp/{1}/target/{0}.war'.format(app_name, source_dir)
         move_file(tomcat_webapp_dir, war_file)
 
 
