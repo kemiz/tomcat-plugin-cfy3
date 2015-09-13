@@ -7,10 +7,11 @@ tosca_definitions_version: cloudify_dsl_1_1
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.2/types.yaml
   - http://www.getcloudify.org/spec/openstack-plugin/1.2/plugin.yaml
-  - http://www.getcloudify.org/spec/diamond-plugin/1.2/plugin.yaml
+#  - http://www.getcloudify.org/spec/diamond-plugin/1.2/plugin.yaml
   - https://raw.githubusercontent.com/kemiz/monitored-server-cfy3/master/types/monitored-server-types.yaml
   - https://raw.githubusercontent.com/kemiz/tomcat-plugin-cfy3/master/plugin.yaml
-  - https://raw.githubusercontent.com/kemiz/mongodb-plugin-cfy/master/plugin.yaml
+  - /Users/kemi/Documents/Development/mongodb-plugin-cfy/plugin.yaml
+#  - https://raw.githubusercontent.com/kemiz/mongodb-plugin-cfy/master/plugin.yaml
   - https://raw.githubusercontent.com/kemiz/cloudify-package-installer-plugin/master/plugin.yaml
 
 inputs:
