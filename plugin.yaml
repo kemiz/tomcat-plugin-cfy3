@@ -10,7 +10,7 @@ plugins:
     source: https://github.com/kemiz/tomcat-plugin-cfy3/archive/master.zip
 
 workflows:
-    deploy_grid:
+    check_tomcat_health:
         mapping: tomcat_plugin.tomcat_plugin.workflows.check_tomcat_health
 
 node_types:
