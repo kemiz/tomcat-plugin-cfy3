@@ -81,3 +81,7 @@ def configure(server_config, **_):
             ctx.logger.info('Moving file: ' + server_xml_url)
             move_command = 'sudo mv ' + server_xml_path + ' ' + tomcat_home_dir + '/server_xml'
             run(move_command)
+
+@operation
+def check_tomcat_health():
+    run('curl localhost:8080')

@@ -9,6 +9,10 @@ plugins:
     executor: host_agent
     source: https://github.com/kemiz/tomcat-plugin-cfy3/archive/master.zip
 
+workflows:
+    deploy_grid:
+        mapping: tomcat_plugin.tomcat_plugin.workflows.check_tomcat_health
+
 node_types:
 
  ##################################################################################
@@ -53,7 +57,8 @@ node_types:
           inputs:
             service_name:
               default: { get_property: [ SELF, service_name ] }
-
+      tomcat.commands:
+        check_tomcat_health: tomcat_plugin.tomcat_plugin.tasks.check_tomcat_health
 
   ##################################################################################
   # Tomcat Simple Application Type (WAR)

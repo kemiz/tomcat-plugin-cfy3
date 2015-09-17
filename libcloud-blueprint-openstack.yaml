@@ -17,7 +17,7 @@ inputs:
     default: 'ec2_giga'
 
   service_url:
-    default: '10.63.175.22'
+    default: ''
 
 node_templates:
 
@@ -26,10 +26,14 @@ node_templates:
   ##################################################################################
 
   host:
-    type: cloudify.nodes.AbstractServer
+    type: cloudify.nodes.libcloud.Compute
     properties:
-      service_url: { get_input: service_url }
-      provider: { get_input: provider }
+      configuration_service:
+        service_url: { get_input: service_url }
+        service_port: 8180
+      provider_config:
+        name: { get_input: provider }
+        configuration: ''
 
   vm_templates:
     type: vm_templates
@@ -49,34 +53,35 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: host
 
-  ##################################################################################
-  # MongoDB node as a backend data-store for the example Tomcat application
-  ##################################################################################
-
-  mongodb:
-    type: cloudify.nodes.MongoDB
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: host
-
-
-  ##################################################################################
-  # Application
-  # This is a Tomcat / MongoDB example application built from source using a
-  # Maven plugin. A URL is provided where the zipped source code may be obtained.
-  # The zip is then extracted, packaged using maven and finally copied to the
-  # specified Tomcat server WebApps directory.
-  ##################################################################################
-
-  tomcat_maven_app:
-    type: cloudify.nodes.TomcatApp
-    properties:
-      name: 'MongoDBWebapp'
-      artefact_url: 'https://github.com/kemiz/MongoDBWebapp/archive/master.zip'
-      maven_app: True
-      branch: 'master'
-    relationships:
-      - type: app_deployed_in_tomcat
-        target: tomcat
-      - type: connected_to_mongo
-        target: mongodb
+#  ##################################################################################
+#  # MongoDB node as a backend data-store for the example Tomcat application
+#  ##################################################################################
+#
+#  mongodb:
+#    type: cloudify.nodes.MongoDB
+#    relationships:
+#      - type: cloudify.relationships.contained_in
+#        target: host
+#      - type: cloudify.relationships.connected_to
+#        target: tomcat
+#
+#  ##################################################################################
+#  # Application
+#  # This is a Tomcat / MongoDB example application built from source using a
+#  # Maven plugin. A URL is provided where the zipped source code may be obtained.
+#  # The zip is then extracted, packaged using maven and finally copied to the
+#  # specified Tomcat server WebApps directory.
+#  ##################################################################################
+#
+#  tomcat_maven_app:
+#    type: cloudify.nodes.TomcatApp
+#    properties:
+#      name: 'MongoDBWebapp'
+#      artefact_url: 'https://github.com/kemiz/MongoDBWebapp/archive/master.zip'
+#      maven_app: True
+#      branch: 'master'
+#    relationships:
+#      - type: app_deployed_in_tomcat
+#        target: tomcat
+#      - type: cloudify.relationships.connected_to
+#        target: mongodb
