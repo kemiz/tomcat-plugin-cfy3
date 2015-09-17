@@ -47,7 +47,7 @@ node_templates:
   # Tomcat server
   ##################################################################################
 
-  tomcat:
+  tomcat_server:
     type: cloudify.nodes.TomcatServer
     relationships:
       - type: cloudify.relationships.contained_in
